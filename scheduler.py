@@ -5,8 +5,11 @@ from dateutil.rrule import rrulestr, rruleset
 from dateutil.tz import UTC
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 def check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None):
     try:
@@ -36,7 +39,9 @@ def check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None):
                 logger.info(f"Exclusion date added: {exdate}")
 
         # Round down the current UTC time to the nearest 30 minutes
-        slot_start_utc = now_utc.replace(minute=(now_utc.minute // 30) * 30, second=0, microsecond=0)
+        slot_start_utc = now_utc.replace(
+            minute=(now_utc.minute // 30) * 30, second=0, microsecond=0
+        )
         slot_end_utc = slot_start_utc + timedelta(minutes=30)
         logger.info(f"Slot start: {slot_start_utc}, Slot end: {slot_end_utc}")
 
@@ -62,11 +67,23 @@ def check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None):
         logger.error(f"Error: {e}")
         return -1  # Return -1 on error
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Check if the next occurrence of an rrule is within the current 30-minute slot.")
-    parser.add_argument('--include-rule', required=True, help="The inclusion rrule string.")
-    parser.add_argument('--exclude-rule', required=False, help="The exclusion rrule string.")
-    parser.add_argument('--exclude-datetimes', required=False, nargs='+', help="A list of datetimes to exclude (in ISO format).")
+    parser = argparse.ArgumentParser(
+        description="Check if the next occurrence of an rrule is within the current 30-minute slot."
+    )
+    parser.add_argument(
+        "--include-rule", required=True, help="The inclusion rrule string."
+    )
+    parser.add_argument(
+        "--exclude-rule", required=False, help="The exclusion rrule string."
+    )
+    parser.add_argument(
+        "--exclude-datetimes",
+        required=False,
+        nargs="+",
+        help="A list of datetimes to exclude (in ISO format).",
+    )
 
     args = parser.parse_args()
 
@@ -79,6 +96,7 @@ def main():
     # Call the check_rrule_in_slot function
     status = check_rrule_in_slot(args.include_rule, args.exclude_rule, exdates)
     exit(status)
+
 
 if __name__ == "__main__":
     main()

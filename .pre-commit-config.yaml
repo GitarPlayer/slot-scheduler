@@ -3,3 +3,6 @@ repos:
     rev: 23.9.1  # Use the latest stable version of black
     hooks:
       - id: black
+        args: ["--quiet"]
+        additional_dependencies: []
+        stages: [commit]
