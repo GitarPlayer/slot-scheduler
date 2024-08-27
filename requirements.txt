@@ -4,3 +4,5 @@ argparse
 pytest
 pytest-cov
 black
+pylint
+pre-commit
