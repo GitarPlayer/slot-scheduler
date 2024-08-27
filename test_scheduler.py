@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import patch
-from rrule_checker import check_rrule_in_slot
+from scheduler import check_rrule_in_slot
 from datetime import datetime
 from dateutil.tz import UTC
 
 
 class TestRRuleCheckerLogging(unittest.TestCase):
 
-    @patch("rrule_checker.logger")
+    @patch("scheduler.logger")
     def test_logging_inclusion_only(self, mock_logger):
         rrule_str = (
             "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
@@ -19,7 +19,7 @@ class TestRRuleCheckerLogging(unittest.TestCase):
         )
         self.assertIn(status, [0, 1])
 
-    @patch("rrule_checker.logger")
+    @patch("scheduler.logger")
     def test_logging_with_exrule(self, mock_logger):
         rrule_str = (
             "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
@@ -32,7 +32,7 @@ class TestRRuleCheckerLogging(unittest.TestCase):
         )
         self.assertIn(status, [0, 1])
 
-    @patch("rrule_checker.logger")
+    @patch("scheduler.logger")
     def test_logging_with_exdate(self, mock_logger):
         rrule_str = (
             "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
@@ -45,7 +45,7 @@ class TestRRuleCheckerLogging(unittest.TestCase):
         )
         self.assertIn(status, [0, 1])
 
-    @patch("rrule_checker.logger")
+    @patch("scheduler.logger")
     def test_logging_job_not_scheduled(self, mock_logger):
         rrule_str = (
             "DTSTART;TZID=UTC:20240101T230000\nRRULE:FREQ=DAILY;BYHOUR=23;BYMINUTE=0"
@@ -56,7 +56,7 @@ class TestRRuleCheckerLogging(unittest.TestCase):
         )
         self.assertIn(status, [0, 1])
 
-    @patch("rrule_checker.logger")
+    @patch("scheduler.logger")
     def test_logging_error(self, mock_logger):
         rrule_str = "INVALID_RRULE_STRING"
         status = check_rrule_in_slot(rrule_str)
