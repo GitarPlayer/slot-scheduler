@@ -8,7 +8,7 @@ from scheduler import check_rrule_in_slot
 class TestScheduler(unittest.TestCase):
     def test_europe_zurich_spring_dst_transition(self):
         rrule_str = "DTSTART;TZID=Europe/Zurich:20300331T020000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
-        utc_now_str_before = "2030-03-31T00:25:00Z"
+        utc_now_str_before = "2030-03-31T01:31:00Z"
         utc_now = datetime.strptime(utc_now_str_before, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
 
         result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
