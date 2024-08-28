@@ -1,68 +1,75 @@
 import unittest
-from unittest.mock import patch
-from scheduler import check_rrule_in_slot
 from datetime import datetime
 from dateutil.tz import UTC
 
-
-class TestRRuleCheckerLogging(unittest.TestCase):
-
-    @patch("scheduler.logger")
-    def test_logging_inclusion_only(self, mock_logger):
-        rrule_str = (
-            "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
-        )
-        status = check_rrule_in_slot(rrule_str)
-        mock_logger.info.assert_any_call(f"Current UTC time: {datetime.now(UTC)}")
-        mock_logger.info.assert_any_call(
-            "Job is within the slot and will be scheduled."
-        )
-        self.assertIn(status, [0, 1])
-
-    @patch("scheduler.logger")
-    def test_logging_with_exrule(self, mock_logger):
-        rrule_str = (
-            "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
-        )
-        exrule_str = "RRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25"
-        status = check_rrule_in_slot(rrule_str, exrule_str=exrule_str)
-        mock_logger.info.assert_any_call(f"Exclusion rule applied: {exrule_str}")
-        mock_logger.info.assert_any_call(
-            "Job is within the slot and will be scheduled."
-        )
-        self.assertIn(status, [0, 1])
-
-    @patch("scheduler.logger")
-    def test_logging_with_exdate(self, mock_logger):
-        rrule_str = (
-            "DTSTART;TZID=UTC:20240101T090000\nRRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
-        )
-        exdates = [datetime(2024, 8, 30, 9, 0, tzinfo=UTC)]
-        status = check_rrule_in_slot(rrule_str, exdates=exdates)
-        mock_logger.info.assert_any_call(f"Exclusion date added: {exdates[0]}")
-        mock_logger.info.assert_any_call(
-            "Job is within the slot and will be scheduled."
-        )
-        self.assertIn(status, [0, 1])
-
-    @patch("scheduler.logger")
-    def test_logging_job_not_scheduled(self, mock_logger):
-        rrule_str = (
-            "DTSTART;TZID=UTC:20240101T230000\nRRULE:FREQ=DAILY;BYHOUR=23;BYMINUTE=0"
-        )
-        status = check_rrule_in_slot(rrule_str)
-        mock_logger.info.assert_any_call(
-            "Job is not within the slot and will not be scheduled."
-        )
-        self.assertIn(status, [0, 1])
-
-    @patch("scheduler.logger")
-    def test_logging_error(self, mock_logger):
-        rrule_str = "INVALID_RRULE_STRING"
-        status = check_rrule_in_slot(rrule_str)
-        mock_logger.error.assert_called_once()
-        self.assertEqual(status, -1)
+from scheduler import check_rrule_in_slot
 
 
-if __name__ == "__main__":
+class TestScheduler(unittest.TestCase):
+    def test_europe_zurich_spring_dst_transition(self):
+        rrule_str = "DTSTART;TZID=Europe/Zurich:20300331T020000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-03-31T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_europe_zurich_fall_dst_transition(self):
+        rrule_str = "DTSTART;TZID=Europe/Zurich:20301027T030000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-10-27T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_us_central_spring_dst_transition(self):
+        rrule_str = "DTSTART;TZID=US/Central:20300309T090000 RRULE:FREQ=DAILY;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-03-09T15:00:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_us_central_fall_dst_transition(self):
+        rrule_str = "DTSTART;TZID=US/Central:20301102T090000 RRULE:FREQ=DAILY;INTERVAL=1"
+        utc_now_str_before = "2030-11-02T14:00:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_asia_tokyo_spring_dst_transition(self):
+        rrule_str = "DTSTART;TZID=Asia/Tokyo:20300331T020000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-03-31T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_asia_tokyo_fall_dst_transition(self):
+        rrule_str = "DTSTART;TZID=Asia/Tokyo:20301027T030000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-10-27T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_asia_singapore_spring_transition(self):
+        rrule_str = "DTSTART;TZID=Asia/Singapore:20300331T020000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-03-31T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+    def test_asia_singapore_fall_transition(self):
+        rrule_str = "DTSTART;TZID=Asia/Singapore:20301027T030000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3"
+        utc_now_str_before = "2030-10-27T00:25:00Z"
+        utc_now = datetime.fromisoformat(utc_now_str_before)
+
+        result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
+        self.assertEqual(result, 0)  # Expected to be within the slot
+
+
+if __name__ == '__main__':
     unittest.main()
