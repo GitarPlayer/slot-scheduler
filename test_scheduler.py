@@ -25,7 +25,9 @@ class TestScheduler(unittest.TestCase):
 
     def test_europe_zurich_monthly(self):
         # This test is for a job scheduled at 08:00 on 26th October 2024 in Europe/Zurich time
-        rrule_str = "DTSTART;TZID=Europe/Zurich:20240101T090000 RRULE:FREQ=MONTHLY;BYDAY=1MO"
+        rrule_str = (
+            "DTSTART;TZID=Europe/Zurich:20240101T090000 RRULE:FREQ=MONTHLY;BYDAY=1MO"
+        )
 
         # Set the mock current time to 06:59 UTC, which is 08:59 in Europe/Zurich on the 26th October 2024
         self.set_mock_now("2024-09-02T07:00:00Z")
@@ -62,15 +64,14 @@ class TestScheduler(unittest.TestCase):
     def test_europe_zurich_annual(self):
         # This test is for a job scheduled at 09:00 on 1st January 2024 (the first Monday) in Europe/Zurich time
         rrule_str = "DTSTART;TZID=Europe/Zurich:20230101T090000 RRULE:FREQ=YEARLY;BYMONTH=1;BYDAY=1MO"
-        
+
         # Set the mock current time to just before 09:00 on 1st January 2024
         self.set_mock_now("2024-01-01T08:00:00Z")
-        
+
         result = check_rrule_in_slot(rrule_str, exrule_str=None, exdates=None)
-        
+
         # Expect the job to be scheduled within the 08:59-09:30 UTC time slot
         self.assertEqual(result, 0)
-
 
     def test_europe_zurich_before_fall_dst_transition(self):
         # This test is for a job scheduled at 08:00 on 26th October 2024 in Europe/Zurich time
@@ -83,7 +84,6 @@ class TestScheduler(unittest.TestCase):
 
         # Expect the job to be scheduled within the 07:00-07:30 UTC time slot
         self.assertEqual(result, 0)
-
 
     def test_europe_zurich_before_fall_dst_transition_exdate_skip(self):
         # This test is for a job scheduled at 08:00 on 26th October 2024 in Europe/Zurich time
